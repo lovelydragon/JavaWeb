@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(value = "login")
+@RequestMapping("/login")
 public class LoginController {
 
-    @RequestMapping(value = "test")
+    @RequestMapping("/test")
     public String test(){
         System.out.println("test");
         return "index";
