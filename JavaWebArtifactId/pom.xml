@@ -46,25 +46,25 @@
       <artifactId>tomcat-servlet-api</artifactId>
       <version>7.0.62</version>
     </dependency>
-<!-- 抓包 -->
-      <dependency>
-          <groupId>com.googlecode.juniversalchardet</groupId>
-          <artifactId>juniversalchardet</artifactId>
-          <version>1.0.3</version>
-      </dependency>
-      <dependency>
-          <groupId>org.kie.modules</groupId>
-          <artifactId>org-apache-commons-httpclient</artifactId>
-          <version>6.2.0.CR2</version>
-          <type>pom</type>
-      </dependency>
-      <dependency>
-          <groupId>org.jsoup</groupId>
-          <artifactId>jsoup</artifactId>
-          <version>1.10.3</version>
-      </dependency>
 
-
+    <!-- 抓包 -->
+    <!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
+    <dependency>
+      <groupId>com.googlecode.juniversalchardet</groupId>
+      <artifactId>juniversalchardet</artifactId>
+      <version>1.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kie.modules</groupId>
+      <artifactId>org-apache-commons-httpclient</artifactId>
+      <version>6.2.0.CR2</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.10.3</version>
+    </dependency>
 
 
 

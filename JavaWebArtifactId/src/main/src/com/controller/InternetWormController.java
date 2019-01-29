@@ -12,11 +12,13 @@ import java.util.List;
 public class InternetWormController {
     @RequestMapping("/top250")
     public ModelAndView top250(){
+        System.out.println("开始获取电影");
         ModelAndView modelAndView = new ModelAndView();
         MyCrawler myCrawler = new MyCrawler();
         String url = "https://movie.douban.com/top250?start=0&filter=";
         List<String> names = myCrawler.crawling(new String[]{url});
         modelAndView.addObject("nams",names);
+        System.out.println(names);
         return modelAndView;
     }
 }

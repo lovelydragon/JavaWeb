@@ -15,6 +15,7 @@ public class MyCrawler {
 
 
     public static String rootUrl = "https://movie.douban.com/top250?start=0&filter=";
+//    public static String rootUrl = "http://127.0.0.1:8080/JavaWebArtifactId_war/index.jsp";
     /**
      * 使用种子初始化 URL 队列
      *
@@ -76,7 +77,6 @@ public class MyCrawler {
                     str = str.replace("</span>","");
                     names.add(str);
                 }
-                System.out.println(names);
             }
 
             //将保存文件
@@ -92,6 +92,7 @@ public class MyCrawler {
 //                System.out.println("新增爬取路径: " + link);
             }
         }
+        System.out.println(names);
         return names;
     }
 
