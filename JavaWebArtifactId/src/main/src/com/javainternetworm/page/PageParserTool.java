@@ -45,10 +45,31 @@ public class PageParserTool {
         while(iterator.hasNext()) {
             Element element1 = (Element) iterator.next();
             for (Element element:element1.children()){
+                //加上名次
+                String rank=null;
+                String content = element.toString();
+                String[] contents = content.split("\n");
+                for (String string:contents){
+                    if (string.contains("<em class>")){
+                        rank = string.replace("<em class>","");
+                        rank = rank.replace("</em>","");
+                    }
+                }
+
+
                 if ( element.hasAttr("href") ) {
-                    links.add(element.attr("abs:href"));
+                    if (rank == null){
+                        links.add(element.attr("abs:href"));
+                    }else{
+                        links.add(element.attr("abs:href")+" "+rank);
+                    }
                 }else if( element.hasAttr("src") ){
-                    links.add(element.attr("abs:src"));
+                    if (rank == null){
+                        links.add(element.attr("abs:src")+" "+rank);
+                    }else {
+                        links.add(element.attr("abs:src")+" "+rank);
+                    }
+
                 }
             }
         }

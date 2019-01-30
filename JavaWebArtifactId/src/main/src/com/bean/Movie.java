@@ -2,6 +2,10 @@ package com.bean;
 
 //电影信息
 public class Movie {
+    //名次
+    private String rank;
+    //名称
+    private String name;
     //国家
     private String country;
     //导演
@@ -16,6 +20,22 @@ public class Movie {
     private String score;
     //时长
     private String duration;
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getCountry() {
         return country;

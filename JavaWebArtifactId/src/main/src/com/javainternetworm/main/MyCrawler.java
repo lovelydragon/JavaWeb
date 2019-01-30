@@ -6,6 +6,8 @@ import com.javainternetworm.link.Links;
 import com.javainternetworm.page.Page;
 import com.javainternetworm.page.PageParserTool;
 import com.javainternetworm.page.RequestAndResponseTool;
+import com.javainternetworm.util.PrintExcel;
+import com.sun.deploy.util.StringUtils;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
@@ -80,29 +82,74 @@ public class MyCrawler {
         }
         //获取所需要的所有信息
         Movie movie;
-//        while(!Links.unVisitedUrlQueueIsEmpty()){
+        List<String> temp = new ArrayList<>();
+        while(!Links.unVisitedUrlQueueIsEmpty()){
             movie = new Movie();
             visitUrl = (String) Links.removeHeadOfUnVisitedUrlQueue();
             if (visitUrl == null) {
-//                continue;
+                continue;
             }
-            page = RequestAndResponseTool.sendRequstAndGetResponse(visitUrl);
+            String[] visitUrls = visitUrl.split(" ");
+            if (visitUrls.length>1){
+                movie.setRank(visitUrls[1]);
+            }
+            page = RequestAndResponseTool.sendRequstAndGetResponse(visitUrls[0]);
             Elements es = PageParserTool.select(page,".subjectwrap");
+            Elements names = PageParserTool.select(page,"span[property=v:itemreviewed]");
+            String namesStr = names.toString();
+            String name = ">(.*?)</span>";
             String director = "rel=\"v:directedBy\">(.*?)</a>";
-            Pattern pattern = Pattern.compile(director);
+//            String country = ":</span> (.*?)";
+            String screenWriter = "/\">(.*?)</a>";
+            String year = "content=\"(.*?)\">";
+            String score = "v:average\">(.*?)</strong>";
+            String peopleNum = "v:votes\">(.*?)</span>";
+            int i = 0;
             if(!es.isEmpty()){
                 System.out.println("下面将打印所有符合要求标签内容： ");
-                System.out.println(es);
                 String contents = es.toString();
-                Matcher matcher = pattern.matcher(contents);
-                while (matcher.find()){
-                    System.out.println("1"+matcher.group(1));
+                String[] content = contents.split("\n");
+                for (String string:content){
+                    if (string.contains("制片国家/地区:")){
+                        movie.setCountry(string.replace("<span class=\"pl\">制片国家/地区:</span> ",""));
+                        break;
+                    }
                 }
+                temp = getRet(namesStr,name);
+                movie.setName(temp.toString());
+                temp = getRet(contents,director);
+                movie.setDirector(StringUtils.join(temp,"/"));
+//                temp = getRet(contents,country);
+//                movie.setCountry(StringUtils.join(temp,"/"));
+                temp = getRet(contents,screenWriter);
+                movie.setScreenWriter(StringUtils.join(temp,"/"));
+                temp = getRet(contents,year);
+                movie.setDuration(temp.get(temp.size()-2));
+                temp.remove(temp.size()-1);
+                temp.remove(temp.size()-1);
+                movie.setYear(StringUtils.join(temp,"/"));
+                temp = getRet(contents,score);
+                movie.setScore(temp.get(temp.size()-1));
+                temp = getRet(contents,peopleNum);
+                movie.setPeopleNum(StringUtils.join(temp,"/"));
             }
             Links.addVisitedUrlSet(visitUrl);
             movies.add(movie);
-//        }
+        }
         return movies;
+    }
+
+    public List<String> getRet(String contents,String pat){
+        Pattern pattern = Pattern.compile(pat);
+        Matcher matcher = pattern.matcher(contents);
+        List<String> ret = new ArrayList<>();
+        while (matcher.find()){
+            int i = 1;
+            System.out.println("find:"+matcher.group(i));
+            ret.add(matcher.group(i));
+            i++;
+        }
+        return ret;
     }
 
 
@@ -178,6 +225,11 @@ public class MyCrawler {
     public static void main(String[] args) {
         MyCrawler crawler = new MyCrawler();
 //        crawler.crawling(new String[]{rootUrl});
-        crawler.crawlingTop250(rootUrl);
+        List<Movie> movies = new ArrayList<>();
+        movies = crawler.crawlingTop250(rootUrl);
+
+        PrintExcel printExcel = new PrintExcel();
+        printExcel.createTop250();
+        printExcel.printTop250(movies);
     }
 }
