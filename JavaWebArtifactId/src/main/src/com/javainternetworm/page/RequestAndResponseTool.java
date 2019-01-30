@@ -7,7 +7,9 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class RequestAndResponseTool {
 
@@ -32,7 +34,9 @@ public class RequestAndResponseTool {
                 System.err.println("Method failed: " + getMethod.getStatusLine());
             }
         // 4.处理 HTTP 响应内容
-            byte[] responseBody = getMethod.getResponseBody();// 读取为字节 数组
+//            byte[] responseBody = getMethod.getResponseBody();// 读取为字节 数组
+            InputStream inputStream = getMethod.getResponseBodyAsStream();
+            byte[] responseBody = input2byte(inputStream);
             String contentType = getMethod.getResponseHeader("Content-Type").getValue(); // 得到当前返回类型
             page = new Page(responseBody,url,contentType); //封装成为页面
         } catch (HttpException e) {
@@ -47,5 +51,18 @@ public class RequestAndResponseTool {
             getMethod.releaseConnection();
         }
         return page;
+    }
+
+    //inputStream转byte数组
+    public static byte[] input2byte(InputStream inStream)
+            throws IOException {
+        ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
+        byte[] buff = new byte[100];
+        int rc = 0;
+        while ((rc = inStream.read(buff, 0, 100)) > 0) {
+            swapStream.write(buff, 0, rc);
+        }
+        byte[] in2b = swapStream.toByteArray();
+        return in2b;
     }
 }

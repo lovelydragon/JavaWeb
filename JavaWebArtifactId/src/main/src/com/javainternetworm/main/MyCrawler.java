@@ -1,5 +1,6 @@
 package com.javainternetworm.main;
 
+import com.bean.Movie;
 import com.javainternetworm.link.LinkFilter;
 import com.javainternetworm.link.Links;
 import com.javainternetworm.page.Page;
@@ -8,8 +9,11 @@ import com.javainternetworm.page.RequestAndResponseTool;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MyCrawler {
 
@@ -25,6 +29,79 @@ public class MyCrawler {
         for (int i = 0; i < seeds.length; i++){
             Links.addUnvisitedUrlQueue(seeds[i]);
         }
+    }
+
+
+    public List<Movie> crawlingTop250(String url){
+        List<Movie> movies = new ArrayList<>();
+
+        initCrawlerWithSeeds(new String[]{url});
+
+        //定义过滤器，提取以 rootUrl 开头的链接
+        LinkFilter filter = new LinkFilter() {
+            public boolean accept(String url) {
+                if (url.startsWith(url))
+                    return true;
+                else
+                    return false;
+            }
+        };
+
+        //获取所有top250的链接
+        String visitUrl = (String) Links.removeHeadOfUnVisitedUrlQueue();
+        Page page = RequestAndResponseTool.sendRequstAndGetResponse(visitUrl);
+        Links.addVisitedUrlSet(visitUrl);
+        Set<String> links = PageParserTool.getLinks(page,".paginator");
+        for (String link : links) {
+            Links.addUnvisitedUrlQueue(link);
+        }
+        Set<String> movieLinks = new HashSet<>();
+        Set<String> movieTempLinks = new HashSet<>();
+        movieTempLinks = PageParserTool.getLinks(page,".pic");
+        for (String link : movieTempLinks) {
+//            Links.addUnvisitedUrlQueue(link);
+            movieLinks.add(link);
+        }
+        while (!Links.unVisitedUrlQueueIsEmpty()) {
+            visitUrl = (String) Links.removeHeadOfUnVisitedUrlQueue();
+            if (visitUrl == null) {
+                continue;
+            }
+            page = RequestAndResponseTool.sendRequstAndGetResponse(visitUrl);
+            movieTempLinks = PageParserTool.getLinks(page, ".pic");
+            for (String link : movieTempLinks) {
+                movieLinks.add(link);
+            }
+            Links.addVisitedUrlSet(visitUrl);
+        }
+        for (String str:movieLinks){
+            Links.addUnvisitedUrlQueue(str);
+        }
+        //获取所需要的所有信息
+        Movie movie;
+//        while(!Links.unVisitedUrlQueueIsEmpty()){
+            movie = new Movie();
+            visitUrl = (String) Links.removeHeadOfUnVisitedUrlQueue();
+            if (visitUrl == null) {
+//                continue;
+            }
+            page = RequestAndResponseTool.sendRequstAndGetResponse(visitUrl);
+            Elements es = PageParserTool.select(page,".subjectwrap");
+            String director = "rel=\"v:directedBy\">(.*?)</a>";
+            Pattern pattern = Pattern.compile(director);
+            if(!es.isEmpty()){
+                System.out.println("下面将打印所有符合要求标签内容： ");
+                System.out.println(es);
+                String contents = es.toString();
+                Matcher matcher = pattern.matcher(contents);
+                while (matcher.find()){
+                    System.out.println("1"+matcher.group(1));
+                }
+            }
+            Links.addVisitedUrlSet(visitUrl);
+            movies.add(movie);
+//        }
+        return movies;
     }
 
 
@@ -76,7 +153,6 @@ public class MyCrawler {
                     str = str.replace("</span>","");
                     names.add(str);
                 }
-                System.out.println(names);
             }
 
             //将保存文件
@@ -92,6 +168,7 @@ public class MyCrawler {
 //                System.out.println("新增爬取路径: " + link);
             }
         }
+        System.out.println(names);
         return names;
     }
 
@@ -99,6 +176,7 @@ public class MyCrawler {
     //main 方法入口
     public static void main(String[] args) {
         MyCrawler crawler = new MyCrawler();
-        crawler.crawling(new String[]{rootUrl});
+//        crawler.crawling(new String[]{rootUrl});
+        crawler.crawlingTop250(rootUrl);
     }
 }
