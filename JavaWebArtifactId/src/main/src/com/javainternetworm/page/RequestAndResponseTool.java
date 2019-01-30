@@ -5,7 +5,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
 import java.io.ByteArrayOutputStream;
@@ -19,11 +18,9 @@ public class RequestAndResponseTool {
         Page page = null;
         // 1.生成 HttpClinet 对象并设置参数
         HttpClient httpClient = new HttpClient();
-        httpClient.getHostConfiguration().setHost(url);
         // 设置 HTTP 连接超时 5s
         httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
         // 2.生成 GetMethod 对象并设置参数
-//        PostMethod getMethod = new PostMethod(url);
         GetMethod getMethod = new GetMethod(url);
         // 设置 get 请求超时 5s
         getMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 5000);
@@ -39,7 +36,7 @@ public class RequestAndResponseTool {
         // 4.处理 HTTP 响应内容
 //            byte[] responseBody = getMethod.getResponseBody();// 读取为字节 数组
             InputStream inputStream = getMethod.getResponseBodyAsStream();
-            byte[] responseBody = read(inputStream);
+            byte[] responseBody = input2byte(inputStream);
             String contentType = getMethod.getResponseHeader("Content-Type").getValue(); // 得到当前返回类型
             page = new Page(responseBody,url,contentType); //封装成为页面
         } catch (HttpException e) {
@@ -57,22 +54,15 @@ public class RequestAndResponseTool {
     }
 
     //inputStream转byte数组
-
-    public static byte[] read(InputStream inputStream) throws IOException {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int num = inputStream.read(buffer);
-            while (num != -1) {
-                baos.write(buffer, 0, num);
-                num = inputStream.read(buffer);
-            }
-            baos.flush();
-            return baos.toByteArray();
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
+    public static byte[] input2byte(InputStream inStream)
+            throws IOException {
+        ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
+        byte[] buff = new byte[100];
+        int rc = 0;
+        while ((rc = inStream.read(buff, 0, 100)) > 0) {
+            swapStream.write(buff, 0, rc);
         }
+        byte[] in2b = swapStream.toByteArray();
+        return in2b;
     }
 }
