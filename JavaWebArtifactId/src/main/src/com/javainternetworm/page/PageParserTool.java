@@ -44,18 +44,17 @@ public class PageParserTool {
         Iterator iterator  = es.iterator();
         while(iterator.hasNext()) {
             Element element1 = (Element) iterator.next();
+            String rank=null;
             for (Element element:element1.children()){
                 //加上名次
-                String rank=null;
                 String content = element.toString();
                 String[] contents = content.split("\n");
                 for (String string:contents){
-                    if (string.contains("<em class>")){
-                        rank = string.replace("<em class>","");
+                    if (string.contains("<em class=\"\">")){
+                        rank = string.replace("<em class=\"\">","");
                         rank = rank.replace("</em>","");
                     }
                 }
-
 
                 if ( element.hasAttr("href") ) {
                     if (rank == null){

@@ -83,11 +83,11 @@ public class MyCrawler {
         //获取所需要的所有信息
         Movie movie;
         List<String> temp = new ArrayList<>();
-        while(!Links.unVisitedUrlQueueIsEmpty()){
+//        while(!Links.unVisitedUrlQueueIsEmpty()){
             movie = new Movie();
             visitUrl = (String) Links.removeHeadOfUnVisitedUrlQueue();
             if (visitUrl == null) {
-                continue;
+//                continue;
             }
             String[] visitUrls = visitUrl.split(" ");
             if (visitUrls.length>1){
@@ -135,7 +135,7 @@ public class MyCrawler {
             }
             Links.addVisitedUrlSet(visitUrl);
             movies.add(movie);
-        }
+//        }
         return movies;
     }
 
