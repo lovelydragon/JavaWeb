@@ -34,6 +34,7 @@
     <!--配置一个SQL语句和映射的配置文件-->
     <mappers>
         <mapper resource="/mapper/User.xml" />
+        <mapper resource="/mapper/Movie.xml"/>
     </mappers>
 
 

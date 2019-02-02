@@ -7,9 +7,14 @@ import com.javainternetworm.page.Page;
 import com.javainternetworm.page.PageParserTool;
 import com.javainternetworm.page.RequestAndResponseTool;
 import com.javainternetworm.util.PrintExcel;
-import com.sun.deploy.util.StringUtils;
+//import com.sun.deploy.util.StringUtils;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.jsoup.select.Elements;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +37,37 @@ public class MyCrawler {
         for (int i = 0; i < seeds.length; i++){
             Links.addUnvisitedUrlQueue(seeds[i]);
         }
+    }
+
+    public void crawlingAllMovie(){
+        //mybatis参数声明
+        SqlSessionFactory sqlSessionFactory;
+        SqlSession sqlSession = null;
+        try {
+            InputStream inputStream = Resources.getResourceAsStream("mybatis.xml");
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+            inputStream.close();
+            sqlSession = sqlSessionFactory.openSession();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        //循环插入信息
+        String rootUrl = "https://movie.douban.com/subject/";
+        Movie movie;
+        Page page;
+        List<String> temp;
+        int i = 3878007;
+//        for (int i=1000000;i<10000000;i++){
+            String url = rootUrl+i;
+            movie = getMovie(url);
+            if (movie == null){
+//                continue;
+            }else {
+                //插入数据到数据库中
+                sqlSession.insert("Movie.insert",movie);
+                sqlSession.commit();
+            }
+//        }
     }
 
 
@@ -89,49 +125,11 @@ public class MyCrawler {
             if (visitUrl == null) {
 //                continue;
             }
+            //分离电影排名
             String[] visitUrls = visitUrl.split(" ");
+            movie = getMovie(visitUrls[0]);
             if (visitUrls.length>1){
                 movie.setRank(visitUrls[1]);
-            }
-            page = RequestAndResponseTool.sendRequstAndGetResponse(visitUrls[0]);
-            Elements es = PageParserTool.select(page,".subjectwrap");
-            Elements names = PageParserTool.select(page,"span[property=v:itemreviewed]");
-            String namesStr = names.toString();
-            String name = ">(.*?)</span>";
-            String director = "rel=\"v:directedBy\">(.*?)</a>";
-//            String country = ":</span> (.*?)";
-            String screenWriter = "/\">(.*?)</a>";
-            String year = "content=\"(.*?)\">";
-            String score = "v:average\">(.*?)</strong>";
-            String peopleNum = "v:votes\">(.*?)</span>";
-            int i = 0;
-            if(!es.isEmpty()){
-                System.out.println("下面将打印所有符合要求标签内容： ");
-                String contents = es.toString();
-                String[] content = contents.split("\n");
-                for (String string:content){
-                    if (string.contains("制片国家/地区:")){
-                        movie.setCountry(string.replace("<span class=\"pl\">制片国家/地区:</span> ",""));
-                        break;
-                    }
-                }
-                temp = getRet(namesStr,name);
-                movie.setName(temp.toString());
-                temp = getRet(contents,director);
-                movie.setDirector(StringUtils.join(temp,"/"));
-//                temp = getRet(contents,country);
-//                movie.setCountry(StringUtils.join(temp,"/"));
-                temp = getRet(contents,screenWriter);
-                movie.setScreenWriter(StringUtils.join(temp,"/"));
-                temp = getRet(contents,year);
-                movie.setDuration(temp.get(temp.size()-2));
-                temp.remove(temp.size()-1);
-                temp.remove(temp.size()-1);
-                movie.setYear(StringUtils.join(temp,"/"));
-                temp = getRet(contents,score);
-                movie.setScore(temp.get(temp.size()-1));
-                temp = getRet(contents,peopleNum);
-                movie.setPeopleNum(StringUtils.join(temp,"/"));
             }
             Links.addVisitedUrlSet(visitUrl);
             movies.add(movie);
@@ -145,14 +143,78 @@ public class MyCrawler {
         List<String> ret = new ArrayList<>();
         while (matcher.find()){
             int i = 1;
-            System.out.println("find:"+matcher.group(i));
+//            System.out.println("find:"+matcher.group(i));
             ret.add(matcher.group(i));
             i++;
         }
         return ret;
     }
 
+    public Movie getMovie(String url){
+        Movie movie = new Movie();
+        List<String> temp;
+        Page page = RequestAndResponseTool.sendRequstAndGetResponse(url);
+        Elements es = PageParserTool.select(page,".subjectwrap");
+        Elements names = PageParserTool.select(page,"span[property=v:itemreviewed]");
+        String namesStr = names.toString();
+        String name = ">(.*?)</span>";
+        String director = "rel=\"v:directedBy\">(.*?)</a>";
+//            String country = ":</span> (.*?)";
+        String screenWriter = "/\">(.*?)</a>";
+        String year = "content=\"(.*?)\">";
+        String score = "v:average\">(.*?)</strong>";
+        String peopleNum = "v:votes\">(.*?)</span>";
+        if(!es.isEmpty()){
+            System.out.println("下面将打印所有符合要求标签内容： ");
+            System.out.println(es);
+            String contents = es.toString();
+            String[] content = contents.split("\n");
+            for (String string:content){
+                if (string.contains("制片国家/地区:")){
+                    movie.setCountry(string.replace("<span class=\"pl\">制片国家/地区:</span> ",""));
+                    break;
+                }
+            }
+            temp = getRet(namesStr,name);
+            if (temp.size()<=0){
+                return null;
+            }
+            movie.setName(temp.toString());
+            temp = getRet(contents,director);
+            movie.setDirector(connect(temp,'/'));
+//                temp = getRet(contents,country);
+//                movie.setCountry(StringUtils.join(temp,"/"));
+            temp = getRet(contents,screenWriter);
+            movie.setScreenWriter(connect(temp,'/'));
+            temp = getRet(contents,year);
+            movie.setDuration(temp.get(temp.size()-2));
+            temp.remove(temp.size()-1);
+            temp.remove(temp.size()-1);
+            movie.setYear(connect(temp,'/'));
+            temp = getRet(contents,score);
+            movie.setScore(temp.get(temp.size()-1));
+            temp = getRet(contents,peopleNum);
+            movie.setPeopleNum(connect(temp,'/'));
+        }
+        return movie;
+    }
 
+    //替换StringUtils.join
+    public String connect(List<String> list,char c){
+        if (list.size()==0){
+            return null;
+        }
+        if (list.size()==1){
+            return list.get(0);
+        }
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(list.get(0));
+        for (int i =1;i<list.size();i++){
+            stringBuffer.append(c);
+            stringBuffer.append(list.get(i));
+        }
+        return stringBuffer.toString();
+    }
     /**
      * 抓取过程
      *
@@ -228,8 +290,8 @@ public class MyCrawler {
         List<Movie> movies = new ArrayList<>();
         movies = crawler.crawlingTop250(rootUrl);
 
-        PrintExcel printExcel = new PrintExcel();
-        printExcel.createTop250();
-        printExcel.printTop250(movies);
+//        PrintExcel printExcel = new PrintExcel();
+//        printExcel.createTop250();
+//        printExcel.printTop250(movies);
     }
 }

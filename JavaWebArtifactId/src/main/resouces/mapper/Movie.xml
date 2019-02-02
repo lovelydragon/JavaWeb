@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--mapper为根元素，namespace指定了命名空间-->
+<mapper namespace="Movie">
+    <insert id="insert" parameterType="com.bean.Movie" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO movie(name,director,screen_writer,country,year,duration,score,people_num)
+         value (#{name},#{director},#{screenWriter},#{country},#{year},#{duration},#{score},#{peopleNum})
+    </insert>
+</mapper>

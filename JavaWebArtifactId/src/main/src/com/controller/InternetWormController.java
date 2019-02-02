@@ -21,4 +21,11 @@ public class InternetWormController {
         System.out.println(names);
         return modelAndView;
     }
+
+    @RequestMapping("/getAllMovie")
+    public ModelAndView getAllMovie(){
+        MyCrawler myCrawler = new MyCrawler();
+        myCrawler.crawlingAllMovie();
+        return null;
+    }
 }

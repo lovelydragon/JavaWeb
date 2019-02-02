@@ -8,4 +8,8 @@
     <select id="selectAll" resultType="com.bean.User">
         SELECT * FROM test
     </select>
+
+    <insert id="insertUser" parameterType="com.bean.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO test(userid,pwd) value (#{userId},#{pwd})
+    </insert>
 </mapper>

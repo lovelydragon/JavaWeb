@@ -22,8 +22,8 @@ public class MybatisController {
 
     private SqlSessionFactory sqlSessionFactory;
 
-    @Resource
-    private UserMapper userMapper;
+//    @Resource
+//    private UserMapper userMapper;
 
     @RequestMapping(value = "user")
     public void test(){
@@ -34,6 +34,11 @@ public class MybatisController {
             sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
             inputStream.close();
             sqlSession = sqlSessionFactory.openSession();
+            User user = new User();
+            user.setPwd("中文");
+            user.setUserId(2);
+            sqlSession.insert("User.insertUser",user);
+            sqlSession.commit();
             userList = sqlSession.selectList("User.selectAll");
         }catch (Exception e){
             e.printStackTrace();
@@ -47,7 +52,7 @@ public class MybatisController {
 
     @RequestMapping(value = "mapper")
     public void annotation(){
-        System.out.println("i am in");
+        System.out.println("中文？");
 //        List<User> userList = userMapper.selectAll();
 //        for (User user: userList){
 //            System.out.println(user.getId()+" "+user.getUserId()+" "+user.getPwd());
