@@ -56,18 +56,19 @@ public class MyCrawler {
         Movie movie;
         Page page;
         List<String> temp;
-        int i = 3878007;
-//        for (int i=1000000;i<10000000;i++){
+//        int i = 3878007;
+        for (int i=1000000;i<10000000;i++){
+            System.out.println("网页数："+i);
             String url = rootUrl+i;
             movie = getMovie(url);
-            if (movie == null){
-//                continue;
+            if (movie == null || movie.getName() == null){
+                continue;
             }else {
                 //插入数据到数据库中
                 sqlSession.insert("Movie.insert",movie);
                 sqlSession.commit();
             }
-//        }
+        }
     }
 
 
@@ -166,7 +167,7 @@ public class MyCrawler {
         String peopleNum = "v:votes\">(.*?)</span>";
         if(!es.isEmpty()){
             System.out.println("下面将打印所有符合要求标签内容： ");
-            System.out.println(es);
+//            System.out.println(es);
             String contents = es.toString();
             String[] content = contents.split("\n");
             for (String string:content){
