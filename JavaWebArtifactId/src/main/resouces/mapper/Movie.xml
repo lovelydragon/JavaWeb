@@ -5,7 +5,7 @@
 <!--mapper为根元素，namespace指定了命名空间-->
 <mapper namespace="Movie">
     <insert id="insert" parameterType="com.bean.Movie" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO movie(name,director,screen_writer,country,year,duration,score,people_num)
-         value (#{name},#{director},#{screenWriter},#{country},#{year},#{duration},#{score},#{peopleNum})
+        INSERT INTO movie(name,director,screen_writer,country,year,duration,score,people_num,rank)
+         value (#{name},#{director},#{screenWriter},#{country},#{year},#{duration},#{score},#{peopleNum},#{rank})
     </insert>
 </mapper>

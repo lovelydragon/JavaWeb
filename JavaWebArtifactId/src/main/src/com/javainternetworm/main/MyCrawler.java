@@ -57,13 +57,14 @@ public class MyCrawler {
         Page page;
         List<String> temp;
 //        int i = 3878007;
-        for (int i=1000000;i<10000000;i++){
+        for (int i=3878011;i<10000000;i++){
             System.out.println("网页数："+i);
             String url = rootUrl+i;
             movie = getMovie(url);
             if (movie == null || movie.getName() == null){
                 continue;
             }else {
+                movie.setRank(String.valueOf(i));
                 //插入数据到数据库中
                 sqlSession.insert("Movie.insert",movie);
                 sqlSession.commit();
@@ -166,7 +167,7 @@ public class MyCrawler {
         String score = "v:average\">(.*?)</strong>";
         String peopleNum = "v:votes\">(.*?)</span>";
         if(!es.isEmpty()){
-            System.out.println("下面将打印所有符合要求标签内容： ");
+//            System.out.println("下面将打印所有符合要求标签内容： ");
 //            System.out.println(es);
             String contents = es.toString();
             String[] content = contents.split("\n");
@@ -188,12 +189,16 @@ public class MyCrawler {
             temp = getRet(contents,screenWriter);
             movie.setScreenWriter(connect(temp,'/'));
             temp = getRet(contents,year);
-            movie.setDuration(temp.get(temp.size()-2));
-            temp.remove(temp.size()-1);
-            temp.remove(temp.size()-1);
-            movie.setYear(connect(temp,'/'));
+            if (temp.size()>=2){
+                movie.setDuration(temp.get(temp.size()-2));
+                temp.remove(temp.size()-1);
+                temp.remove(temp.size()-1);
+                movie.setYear(connect(temp,'/'));
+            }
             temp = getRet(contents,score);
-            movie.setScore(temp.get(temp.size()-1));
+            if (temp.size()>=1){
+                movie.setScore(temp.get(temp.size()-1));
+            }
             temp = getRet(contents,peopleNum);
             movie.setPeopleNum(connect(temp,'/'));
         }
@@ -202,7 +207,7 @@ public class MyCrawler {
 
     //替换StringUtils.join
     public String connect(List<String> list,char c){
-        if (list.size()==0){
+        if (list == null || list.size()==0){
             return null;
         }
         if (list.size()==1){
@@ -291,8 +296,8 @@ public class MyCrawler {
         List<Movie> movies = new ArrayList<>();
         movies = crawler.crawlingTop250(rootUrl);
 
-//        PrintExcel printExcel = new PrintExcel();
-//        printExcel.createTop250();
-//        printExcel.printTop250(movies);
+        PrintExcel printExcel = new PrintExcel();
+        printExcel.createTop250();
+        printExcel.printTop250(movies);
     }
 }
