@@ -56,20 +56,20 @@ public class MyCrawler {
         Movie movie;
         Page page;
         List<String> temp;
-//        int i = 3878007;
-        for (int i=3878011;i<10000000;i++){
+        int i = 4122190;
+//        for (int i=3878011;i<10000000;i++){
             System.out.println("网页数："+i);
             String url = rootUrl+i;
             movie = getMovie(url);
             if (movie == null || movie.getName() == null){
-                continue;
+//                continue;
             }else {
                 movie.setRank(String.valueOf(i));
                 //插入数据到数据库中
                 sqlSession.insert("Movie.insert",movie);
                 sqlSession.commit();
             }
-        }
+//        }
     }
 
 
